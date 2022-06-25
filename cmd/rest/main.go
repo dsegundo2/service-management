@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/dsegundo2/service-management/internal/database/servicedb"
+	"github.com/dsegundo2/service-management/internal/servicedb"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -16,7 +16,8 @@ func main() {
 
 	postgresDB, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
 	if err != nil {
-		logrus.WithField("Connection String", dbUrl).Fatal("could not create connect to database")
+		logrus.WithField("Connection String", dbUrl).
+			Fatal("could not create connect to database. make sure to export a SERVICE_MANAGEMENT_DB_CONNECTION_URL variable")
 	}
 	serviceDatabase := servicedb.New(postgresDB)
 
@@ -27,5 +28,7 @@ func main() {
 	}
 	defer db.Close()
 
-	serviceDatabase.AutoMigrate()
+	if err := serviceDatabase.Migrate(); err != nil {
+		logrus.WithField("Connection String", dbUrl).Fatal("error when migrating database")
+	}
 }
