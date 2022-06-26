@@ -1,6 +1,9 @@
 package servicedb
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -38,9 +41,10 @@ func (s *Service) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (si *ServiceInstance) BeforeCreate(tx *gorm.DB) (err error) {
-	// TODO: implment regex ^(\d+\.)?(\d+\.)?(\*|\d+)$
-	if si.Version == "" {
-		s.ID = uuid.NewString()
+	// Regex ^(\d+\.)?(\d+\.)?(\*|\d+)$ to check for 0.0.0 formatting on version
+	matched, err := regexp.MatchString("^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$", si.Version)
+	if !matched || err != nil {
+		return fmt.Errorf("version format not supported, must follow 0.0.0 semantic")
 	}
 	return
 }
