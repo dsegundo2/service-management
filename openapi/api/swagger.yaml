@@ -1,0 +1,508 @@
+openapi: 3.0.1
+info:
+  title: Service Managemenet
+  description: This is a sample proof of concept repo meant to be run on localhost
+    at the moment
+  contact:
+    email: diegosegundo2@gmail.com
+  version: 1.0.0
+servers:
+- url: http://localhost:8081/v1
+tags:
+- name: Service
+  description: Everything about your the Service
+- name: Service Version
+  description: Information around a specific version of a service
+paths:
+  /services:
+    get:
+      tags:
+      - Service
+      summary: List Services
+      parameters:
+      - name: filter
+        in: query
+        description: Filters the services by looking for this substring in the service
+          Title
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: "Based on the google api spec. The string value should follow\
+          \ SQL syntax: comma separated list of fields. For example: \"foo,bar\".\
+          \ The default sorting order is ascending. To specify descending order for\
+          \ a field, a suffix \" desc\" should be appended to the field name. Ex:\
+          \ \"foo desc,bar\""
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Maximum number of responses to return
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 10
+      - name: offset
+        in: query
+        description: Number of services to skip over before returning the list
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListServicesResponse'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content: {}
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Error
+          content: {}
+    put:
+      tags:
+      - Service
+      summary: Update Service
+      description: Used to update values of the service. Only Updates the Title and
+        the Description fields
+      requestBody:
+        description: Service info needed to update the service. Field masks specifies
+          which values to update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateServiceRequest'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content: {}
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Error
+          content: {}
+      x-codegen-request-body-name: body
+    post:
+      tags:
+      - Service
+      summary: Add a new service
+      requestBody:
+        description: Service info needed to create the service
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateServiceRequest'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content: {}
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Error
+          content: {}
+      x-codegen-request-body-name: body
+  /services/{service_id}:
+    get:
+      tags:
+      - Service
+      summary: Get a service
+      parameters:
+      - name: load_versions
+        in: query
+        description: Determines whether or not to load the information about a services
+          versions
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      - name: service_id
+        in: path
+        description: ID of the service
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content: {}
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Error
+          content: {}
+    delete:
+      tags:
+      - Service
+      summary: Delete Service
+      parameters:
+      - name: service_id
+        in: path
+        description: ID of the service to delete
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Empty'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content: {}
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Error
+          content: {}
+  /services/{service_id}:addVersion:
+    post:
+      tags:
+      - Service Version
+      summary: Add a new service version
+      parameters:
+      - name: service_id
+        in: path
+        description: ID of the service
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Service info needed to create the service version
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddServiceVersionRequest'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceVersion'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content: {}
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Error
+          content: {}
+      x-codegen-request-body-name: body
+  /services/{service_id}:removeVersion:
+    post:
+      tags:
+      - Service Version
+      summary: Remove a new service version
+      parameters:
+      - name: service_id
+        in: path
+        description: ID of the service
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Service info needed to remove the service version
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveServiceVersionRequest'
+        required: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Empty'
+                x-content-type: application/json
+        "400":
+          description: Bad Request
+          content: {}
+        "404":
+          description: Not Found
+          content: {}
+        "500":
+          description: Internal Error
+          content: {}
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        created_at:
+          type: string
+          description: Time the sevice was created
+          format: date-time
+        updated_at:
+          type: string
+          description: Time the sevice was updated
+          format: date-time
+        deleted_at:
+          type: string
+          description: Time the sevice was deleted
+          format: date-time
+        title:
+          type: string
+          description: Unique Title of the service
+          example: Locate Us
+        description:
+          type: string
+          description: description of the service
+          example: sample description along here
+        versions:
+          type: array
+          description: List of the services versions
+          items:
+            $ref: '#/components/schemas/ServiceVersion'
+        version_count:
+          type: number
+          description: Number of versions the service has
+          format: int64
+      example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        versions:
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          service_id: 123e4567-e89b-12d3-a456-426614174000
+          created_at: 2000-01-23T04:56:07.000+00:00
+          version: 1.0.4
+          deleted_at: 2000-01-23T04:56:07.000+00:00
+          service_example_field: some random string
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          service_id: 123e4567-e89b-12d3-a456-426614174000
+          created_at: 2000-01-23T04:56:07.000+00:00
+          version: 1.0.4
+          deleted_at: 2000-01-23T04:56:07.000+00:00
+          service_example_field: some random string
+        created_at: 2000-01-23T04:56:07.000+00:00
+        description: sample description along here
+        id: 123e4567-e89b-12d3-a456-426614174000
+        title: Locate Us
+        deleted_at: 2000-01-23T04:56:07.000+00:00
+        version_count: 6.027456183070403
+    ServiceVersion:
+      type: object
+      properties:
+        version:
+          type: string
+          description: version number of this service version. must follow number.number.number
+            format
+          format: version
+          example: 1.0.4
+        service_id:
+          type: string
+          description: parent id that the service version belongs to
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+        service_example_field:
+          type: string
+          description: proof of concept random field on a version
+          example: some random string
+      example:
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        service_id: 123e4567-e89b-12d3-a456-426614174000
+        created_at: 2000-01-23T04:56:07.000+00:00
+        version: 1.0.4
+        deleted_at: 2000-01-23T04:56:07.000+00:00
+        service_example_field: some random string
+    Empty:
+      type: object
+      description: Empty object for return value
+    UpdateServiceRequest:
+      type: object
+      properties:
+        service_id:
+          type: string
+          description: id of the service to update
+        title:
+          type: string
+          description: title for the service to update
+        description:
+          type: string
+          description: new description of the service to update
+    AddServiceVersionRequest:
+      type: object
+      properties:
+        version:
+          type: string
+          description: version number of this service version. must follow number.number.number
+            format
+          format: version
+          example: 1.0.4
+        service_example_field:
+          type: string
+          description: proof of concept random field on a version
+          example: some random string
+        service_id:
+          type: string
+          description: parent id that the service version belongs to
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    RemoveServiceVersionRequest:
+      type: object
+      properties:
+        version:
+          type: string
+          description: version number of this service version. must follow number.number.number
+            format
+          format: version
+          example: 1.0.4
+        service_id:
+          type: string
+          description: parent id that the service version belongs to
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    CreateServiceRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Unique Title of the service
+          example: Locate Us
+        description:
+          type: string
+          description: description of the service
+          example: sample description along here
+    ListServicesResponse:
+      type: object
+      properties:
+        total_count:
+          type: integer
+          description: Total number of objects found not only on this page
+        services:
+          type: array
+          description: List of services
+          items:
+            $ref: '#/components/schemas/Service'
+      example:
+        total_count: 0
+        services:
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          versions:
+          - updated_at: 2000-01-23T04:56:07.000+00:00
+            service_id: 123e4567-e89b-12d3-a456-426614174000
+            created_at: 2000-01-23T04:56:07.000+00:00
+            version: 1.0.4
+            deleted_at: 2000-01-23T04:56:07.000+00:00
+            service_example_field: some random string
+          - updated_at: 2000-01-23T04:56:07.000+00:00
+            service_id: 123e4567-e89b-12d3-a456-426614174000
+            created_at: 2000-01-23T04:56:07.000+00:00
+            version: 1.0.4
+            deleted_at: 2000-01-23T04:56:07.000+00:00
+            service_example_field: some random string
+          created_at: 2000-01-23T04:56:07.000+00:00
+          description: sample description along here
+          id: 123e4567-e89b-12d3-a456-426614174000
+          title: Locate Us
+          deleted_at: 2000-01-23T04:56:07.000+00:00
+          version_count: 6.027456183070403
+        - updated_at: 2000-01-23T04:56:07.000+00:00
+          versions:
+          - updated_at: 2000-01-23T04:56:07.000+00:00
+            service_id: 123e4567-e89b-12d3-a456-426614174000
+            created_at: 2000-01-23T04:56:07.000+00:00
+            version: 1.0.4
+            deleted_at: 2000-01-23T04:56:07.000+00:00
+            service_example_field: some random string
+          - updated_at: 2000-01-23T04:56:07.000+00:00
+            service_id: 123e4567-e89b-12d3-a456-426614174000
+            created_at: 2000-01-23T04:56:07.000+00:00
+            version: 1.0.4
+            deleted_at: 2000-01-23T04:56:07.000+00:00
+            service_example_field: some random string
+          created_at: 2000-01-23T04:56:07.000+00:00
+          description: sample description along here
+          id: 123e4567-e89b-12d3-a456-426614174000
+          title: Locate Us
+          deleted_at: 2000-01-23T04:56:07.000+00:00
+          version_count: 6.027456183070403
+x-original-swagger-version: "2.0"

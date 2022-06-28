@@ -1,0 +1,374 @@
+swagger: "2.0"
+info:
+  description: "This is a sample proof of concept repo meant to be run on localhost at the moment"
+  version: "1.0.0"
+  title: "Service Managemenet"
+  contact:
+    email: "diegosegundo2@gmail.com"
+host: "localhost:8081"
+basePath: "/v1"
+tags:
+- name: "Service"
+  description: "Everything about your the Service"
+- name: "Service Version"
+  description: "Information around a specific version of a service"
+schemes:
+- "http"
+paths:
+  /services:
+    post:
+      tags:
+      - "Service"
+      summary: "Add a new service"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Service info needed to create the service"
+        required: true
+        schema:
+          $ref: "#/definitions/CreateServiceRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/Service"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+        "500":
+          description: "Internal Error"
+    get:
+      tags:
+      - "Service"
+      summary: "List Services"
+      description: "Provide filters and get a list of services that meet the criteria"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "filter"
+        in: "query"
+        description: "Filters the services by looking for this Case Sensitive substring in the service Title"
+        required: false
+        type: "string"
+      - name: "sort"
+        in: "query"
+        description: "Based on the google api spec. The string value should follow SQL syntax: comma separated list of fields. For example: \"foo,bar\". The default sorting order is ascending. To specify descending order for a field, a suffix \" desc\" should be appended to the field name. Ex: \"foo desc,bar\""
+        required: false
+        type: "string"
+      - name: "limit"
+        in: "query"
+        description: "Maximum number of responses to return. Sets the default to 10 if a limit is not provided"
+        required: false
+        type: "integer"
+        default: 10
+      - name: "offset"
+        in: "query"
+        description: "Number of services to skip over before returning the list"
+        required: false
+        type: "integer"
+        default: 0
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/ListServicesResponse"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+        "500":
+          description: "Internal Error"
+    put:
+      tags:
+      - "Service"
+      summary: "Update Service"
+      description: "Used to update values of the service. Only Updates the Title and the Description fields"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Service info needed to update the service. Field masks specifies which values to update"
+        required: true
+        schema:
+          $ref: "#/definitions/UpdateServiceRequest"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/Service"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+        "500":
+          description: "Internal Error"
+  /services/{service_id}:
+   get:
+      tags:
+      - "Service"
+      summary: "Get a service"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "load_versions"
+        in: "query"
+        description: "Determines whether or not to load the information about a services versions"
+        required: false
+        type: "boolean"
+        default: false
+      - name: "service_id"
+        in: "path"
+        description: "ID of the service"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/Service"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+        "500":
+          description: "Internal Error"
+   delete:
+      tags:
+      - "Service"
+      summary: "Delete Service"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "service_id"
+        in: "path"
+        description: "ID of the service to delete"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/Empty"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+        "500":
+          description: "Internal Error"
+  /services/{service_id}:addVersion:
+   post:
+      tags:
+      - "Service Version"
+      summary: "Add a new service version"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Service info needed to create the service version"
+        required: true
+        schema:
+          $ref: "#/definitions/AddServiceVersionRequest"
+      - name: "service_id"
+        in: "path"
+        description: "ID of the service"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/ServiceVersion"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+        "500":
+          description: "Internal Error"
+  /services/{service_id}:removeVersion:
+   post:
+      tags:
+      - "Service Version"
+      summary: "Remove a new service version"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Service info needed to remove the service version"
+        required: true
+        schema:
+          $ref: "#/definitions/RemoveServiceVersionRequest"
+      - name: "service_id"
+        in: "path"
+        description: "ID of the service"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/Empty"
+        "400":
+          description: "Bad Request"
+        "404":
+          description: "Not Found"
+        "500":
+          description: "Internal Error"
+definitions:
+  Service:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      created_at:
+        type: "string"
+        description: "Time the sevice was created"
+        format: "date-time"
+      updated_at:
+        type: "string"
+        description: "Time the sevice was updated"
+        format: "date-time"
+      deleted_at:
+        type: "string"
+        description: "Time the sevice was deleted"
+        format: "date-time"
+      title:
+        type: "string"
+        description: "Unique Title of the service"
+        example: "Locate Us"
+      description:
+        type: "string"
+        description: "description of the service"
+        example: "sample description along here"
+      versions:
+        type: "array"
+        description: "List of the services versions"
+        items:
+          $ref: "#/definitions/ServiceVersion"
+      version_count:
+        type: "number"
+        description: "Number of versions the service has"
+        format: "int64"
+  ServiceVersion:
+    type: "object"
+    properties:
+      version:
+        type: "string"
+        format: "version"
+        description: "version number of this service version. must follow number.number.number format"
+        example: "1.0.4"
+      service_id:
+        type: "string"
+        format: "uuid"
+        description: "parent id that the service version belongs to"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+      created_at:
+        type: "string"
+        format: "date-time"
+      updated_at:
+        type: "string"
+        format: "date-time"
+      deleted_at:
+        type: "string"
+        format: "date-time"
+      service_example_field:
+        type: "string"
+        description: "proof of concept random field on a version"
+        example: "some random string"
+  Empty:
+    type: "object"
+    description: "Empty object for return value"
+  UpdateServiceRequest:
+    type: "object"
+    properties:
+      service_id:
+        type: "string"
+        description: "id of the service to update"
+      title:
+        type: "string"
+        description: "title for the service to update"
+      description:
+        type: "string"
+        description: "new description of the service to update"
+  AddServiceVersionRequest:
+    type: "object"
+    properties:
+      version:
+        type: "string"
+        format: "version"
+        description: "version number of this service version. must follow number.number.number format"
+        example: "1.0.4"
+      service_example_field:
+        type: "string"
+        description: "proof of concept random field on a version"
+        example: "some random string"
+      service_id:
+        type: "string"
+        format: "uuid"
+        description: "parent id that the service version belongs to"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+  RemoveServiceVersionRequest:
+    type: "object"
+    properties:
+      version:
+        type: "string"
+        format: "version"
+        description: "version number of this service version. must follow number.number.number format"
+        example: "1.0.4"
+      service_id:
+        type: "string"
+        format: "uuid"
+        description: "parent id that the service version belongs to"
+        example: "123e4567-e89b-12d3-a456-426614174000"
+  CreateServiceRequest:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+        description: "Unique Title of the service"
+        example: "Locate Us"
+      description:
+        type: "string"
+        description: "description of the service"
+        example: "sample description along here"
+  ListServicesResponse:
+    type: "object"
+    properties:
+      total_count:
+        type: "integer"
+        description: "Total number of objects found not only on this page"
+      services:
+        type: "array"
+        description: "List of services"
+        items:
+          $ref: "#/definitions/Service"
+

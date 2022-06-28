@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/dsegundo2/service-management/internal/rest"
 	"github.com/dsegundo2/service-management/internal/servicedb"
 
 	"github.com/sirupsen/logrus"
@@ -31,4 +32,19 @@ func main() {
 	if err := serviceDatabase.Migrate(); err != nil {
 		logrus.WithField("Connection String", dbUrl).Fatal("error when migrating database")
 	}
+
+	// Create Logget
+	log := logrus.NewEntry(logrus.StandardLogger())
+	log.Logger.SetFormatter(&logrus.JSONFormatter{
+		PrettyPrint: true,
+	})
+
+	// Create Router
+	addr := os.Getenv("SERVICE_MANAGEMENT_ADDRESS")
+	if addr == "" {
+		log.Fatal("SERVICE_MANAGEMENT_ADDRESS required as environment variable")
+	}
+	server := rest.New(addr, serviceDatabase, log)
+
+	server.Listen()
 }
