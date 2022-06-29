@@ -33,7 +33,7 @@ func main() {
 		logrus.WithField("Connection String", dbUrl).Fatal("error when migrating database")
 	}
 
-	// Create Logget
+	// Create Logger
 	log := logrus.NewEntry(logrus.StandardLogger())
 	log.Logger.SetFormatter(&logrus.JSONFormatter{
 		PrettyPrint: true,

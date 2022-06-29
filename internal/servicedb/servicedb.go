@@ -23,7 +23,7 @@ func (db *ServiceDB) ListServices(filter, sort string, limit, offset int) (servi
 	logrus.WithError(err).WithFields(logrus.Fields{
 		"Count": totalCount,
 		"List":  serviceList,
-	}).Info("List services query")
+	}).Debug("List services query")
 	return
 }
 
@@ -74,7 +74,7 @@ func (db *ServiceDB) UpdateServiceVersion(version *ServiceVersion) error {
 }
 
 func (db *ServiceDB) DeleteServiceVersion(serviceID, version string) error {
-	return db.Delete(&ServiceVersion{
+	return db.Unscoped().Delete(&ServiceVersion{
 		Version:   version,
 		ServiceID: serviceID,
 	}).Error

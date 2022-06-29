@@ -19,11 +19,12 @@ paths:
       tags:
       - Service
       summary: List Services
+      description: Provide filters and get a list of services that meet the criteria
       parameters:
       - name: filter
         in: query
-        description: Filters the services by looking for this substring in the service
-          Title
+        description: Filters the services by looking for this Case Sensitive substring
+          in the service Title
         required: false
         style: form
         explode: true
@@ -43,7 +44,8 @@ paths:
           type: string
       - name: limit
         in: query
-        description: Maximum number of responses to return
+        description: Maximum number of responses to return. Sets the default to 10
+          if a limit is not provided
         required: false
         style: form
         explode: true

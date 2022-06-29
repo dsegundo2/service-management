@@ -28,11 +28,12 @@ var (
 type ServiceApiService service
 /*
 ServiceApiService List Services
+Provide filters and get a list of services that meet the criteria
  * @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param optional nil or *ServiceApiServicesGetOpts - Optional Parameters:
-     * @param "Filter" (optional.String) -  Filters the services by looking for this substring in the service Title
+     * @param "Filter" (optional.String) -  Filters the services by looking for this Case Sensitive substring in the service Title
      * @param "Sort" (optional.String) -  Based on the google api spec. The string value should follow SQL syntax: comma separated list of fields. For example: \&quot;foo,bar\&quot;. The default sorting order is ascending. To specify descending order for a field, a suffix \&quot; desc\&quot; should be appended to the field name. Ex: \&quot;foo desc,bar\&quot;
-     * @param "Limit" (optional.Int32) -  Maximum number of responses to return
+     * @param "Limit" (optional.Int32) -  Maximum number of responses to return. Sets the default to 10 if a limit is not provided
      * @param "Offset" (optional.Int32) -  Number of services to skip over before returning the list
 @return []ListServicesResponse
 */

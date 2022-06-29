@@ -16,23 +16,31 @@ import (
 
 var (
 	ErrMissingRequestData = errors.New("missing required field")
+	ErrNotFound           = errors.New("no record found")
 )
 
 func (s *Server) HandleCreateService(w http.ResponseWriter, r *http.Request) {
-	service := &db.Service{}
-
+	// Decode request
+	apiService := &models.CreateServiceRequest{}
 	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&service); err != nil {
+	if err := decoder.Decode(&apiService); err != nil {
 		s.writeResponse(w, r, nil, ErrMissingRequestData)
 		return
 	}
 	defer r.Body.Close()
 
+	// Convert to db struct
+	service := models.ConvertToDbService(apiService)
+
+	// Create in database
 	err := s.db.CreateService(service)
+
+	// Write http response with error or success
 	s.writeResponse(w, r, service, err)
 }
 
 func (s *Server) HandleReadService(w http.ResponseWriter, r *http.Request) {
+	// Grab query params
 	var err error
 	loadParam := r.URL.Query()["load_versions"]
 	var loadVersions bool
@@ -43,6 +51,8 @@ func (s *Server) HandleReadService(w http.ResponseWriter, r *http.Request) {
 		s.writeResponse(w, r, nil, ErrMissingRequestData)
 		return
 	}
+
+	// Get ID from path
 	path := r.URL.Path
 	splitPath := strings.Split(path, "/")
 	if len(splitPath) < 3 {
@@ -53,12 +63,15 @@ func (s *Server) HandleReadService(w http.ResponseWriter, r *http.Request) {
 	service := &db.Service{
 		ID: splitPath[3],
 	}
+
+	// Query db and return results
 	err = s.db.ReadService(service, loadVersions)
 
 	s.writeResponse(w, r, service, err)
 }
 
 func (s *Server) HandleListServices(w http.ResponseWriter, r *http.Request) {
+	// Get Query params and error out if they are not the right type
 	var err error
 	filterParam := r.URL.Query()["filter"]
 	var filter string
@@ -92,11 +105,18 @@ func (s *Server) HandleListServices(w http.ResponseWriter, r *http.Request) {
 		s.writeResponse(w, r, nil, ErrMissingRequestData)
 		return
 	}
+
+	// Query database and return the results
 	services, total, err := s.db.ListServices(filter, sort, limit, offset)
 
 	resp := &models.ListServicesResponse{}
 	if err == nil {
 		resp = models.ConvertListServicesResponse(services, int(total))
+		// Return not found if there are no services in the list
+		if len(resp.Services) == 0 {
+			s.writeResponse(w, r, nil, ErrNotFound)
+			return
+		}
 	}
 
 	s.writeResponse(w, r, resp, err)
@@ -112,6 +132,7 @@ func (s *Server) HandleUpdateService(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	// Convert the request fields in to a db struct
 	dbService := &db.Service{
 		ID:          serviceUpdateRequest.ServiceId,
 		Title:       serviceUpdateRequest.Title,
@@ -137,7 +158,22 @@ func (s *Server) HandleAddServiceVersion(w http.ResponseWriter, r *http.Request)
 }
 
 func (s *Server) HandleRemoveServiceVersion(w http.ResponseWriter, r *http.Request) {
+	removeReq := models.RemoveServiceVersionRequest{}
 
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&removeReq); err != nil {
+		s.writeResponse(w, r, nil, ErrMissingRequestData)
+		return
+	}
+	defer r.Body.Close()
+
+	if removeReq.ServiceId == "" || removeReq.Version == "" {
+		s.writeResponse(w, r, nil, ErrMissingRequestData)
+		return
+	}
+
+	err := s.db.DeleteServiceVersion(removeReq.ServiceId, removeReq.Version)
+	s.writeResponse(w, r, models.Empty{}, err)
 }
 
 func (s *Server) HandleDeleteService(w http.ResponseWriter, r *http.Request) {
@@ -160,7 +196,7 @@ func (s *Server) writeResponse(w http.ResponseWriter, r *http.Request, payload i
 		"Response Body": payload,
 	}).Info("request finished")
 
-	// One off check for duplicate key. TODO: make cleaner with db exported errors
+	// One off check for duplicate key. TODO: make cleaner error handling with db exported errors
 	if err != nil && strings.Contains(err.Error(), "duplicate key") {
 		w.WriteHeader(http.StatusConflict)
 		w.Write([]byte("duplicate value. unique value already exists"))

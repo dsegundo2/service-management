@@ -60,3 +60,10 @@ func ConvertToApiVersion(v *servicedb.ServiceVersion) ServiceVersion {
 		ServiceExampleField: v.ServiceExampleField,
 	}
 }
+
+func ConvertToDbService(s *CreateServiceRequest) *servicedb.Service {
+	return &servicedb.Service{
+		Title:       s.Title,
+		Description: s.Description,
+	}
+}

@@ -14,6 +14,8 @@ Method | HTTP request | Description
 > []ListServicesResponse ServicesGet(ctx, optional)
 List Services
 
+Provide filters and get a list of services that meet the criteria
+
 ### Required Parameters
 
 Name | Type | Description  | Notes
@@ -25,9 +27,9 @@ Name | Type | Description  | Notes
 Optional parameters are passed through a pointer to a ServiceApiServicesGetOpts struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **filter** | **optional.String**| Filters the services by looking for this substring in the service Title | 
+ **filter** | **optional.String**| Filters the services by looking for this Case Sensitive substring in the service Title | 
  **sort** | **optional.String**| Based on the google api spec. The string value should follow SQL syntax: comma separated list of fields. For example: \&quot;foo,bar\&quot;. The default sorting order is ascending. To specify descending order for a field, a suffix \&quot; desc\&quot; should be appended to the field name. Ex: \&quot;foo desc,bar\&quot; | 
- **limit** | **optional.Int32**| Maximum number of responses to return | [default to 10]
+ **limit** | **optional.Int32**| Maximum number of responses to return. Sets the default to 10 if a limit is not provided | [default to 10]
  **offset** | **optional.Int32**| Number of services to skip over before returning the list | [default to 0]
 
 ### Return type
